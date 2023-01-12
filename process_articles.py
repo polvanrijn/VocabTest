@@ -1,47 +1,18 @@
 import argparse
 import os
-import sqlite3
-import subprocess
 import sys
-from datetime import datetime
 import random
 
-import apsw
-import pandas as pd
 import json
-import conllu
 import re
 from tqdm import tqdm
 import requests
 import time
-import fasttext
-from guess_language import guess_language
-from os.path import exists
+
 
 start_time = time.time()
 
-
-def get_time(msg):
-    global start_time
-    print(msg + " in %s seconds" % (time.time() - start_time))
-    start_time = time.time()
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--language', required=True, help='ISO language code')
-parser.add_argument('--reversed_order', default=0, type=int, help='Go through the data in reversed order', choices=[0, 1])
-parser.add_argument('--port', default=None, help='Port for the server')
-args = parser.parse_args()
-args.reversed_order = bool(args.reversed_order)
-
-import enchant
-broker = enchant.Broker()
-lang_list = list(set([lang.split('_')[0] for lang in broker.list_languages()]))
-fasttext_fallback = not args.language in lang_list
-print("Using dictionary" if not fasttext_fallback else "Using fasttext")
-
-domain = f"https://{args.language}.wikipedia.org"
-model_mapping = {
+MODEL_MAPPING = {
     'af': 'afrikaans-afribooms-ud-2.10-220711',
     'ar': 'arabic-padt-ud-2.10-220711',
     'be': 'belarusian-hse-ud-2.10-220711',
@@ -103,21 +74,13 @@ model_mapping = {
     'wo': 'wolof-wtb-ud-2.10-220711',
     'zh': 'chinese-gsdsimp-ud-2.10-220711'
 }
-
-ud_models = pd.read_csv('ud2-10_models.csv', names=['names', 'path', 'variant', 'acknowledgements'])
-
-assert args.language in model_mapping.keys(), f'Language {args.language} not supported'
-MODEL = model_mapping[args.language]
-print(MODEL)
-
 BLOCK_TYPES = ['Foreign', 'Abbr', 'Typo']
 PUNCTUATION = ['|', '\\', '^', ',', '(', '*', '"', '!', '$', '/', '[', '`', ';', ']', '#', '}', '&', '=', "'", '@', '~',
                '{', '>', '<', '%', '_', '?', '+', '-', ')', ':', '.']
 TEXT_BLOCKS = ['_START_ARTICLE_', '_START_PARAGRAPH_', '_START_SECTION_', '_END_SECTION_', '_END_PARAGRAPH_', '_END_ARTICLE_']
-word2spellcheck = {}
-fasttext_model = fasttext.load_model("fastText/lid.176.bin")
 
 def silent_guess_language(word):
+    from guess_language import guess_language
     save_stdout = sys.stdout
     sys.stdout = open(os.devnull, 'w')
     out = guess_language(word)
@@ -125,7 +88,7 @@ def silent_guess_language(word):
     return out
 
 def spellcheck(word):
-    global word2spellcheck
+    global word2spellcheck, fasttext_model, fasttext_fallback
     if word not in word2spellcheck:
         embedding = fasttext_model.predict(word, k=10)
         langs = [lang.replace("__label__", "") for lang in embedding[0]]
@@ -136,12 +99,7 @@ def spellcheck(word):
     return word2spellcheck[word]
 
 
-def reject_word(word, token, locale):
-    if token['feats'] is not None:
-        for key in BLOCK_TYPES:
-            if key in token['feats'] and token['feats'][key] == 'Yes':
-                return True, key
-    
+def basic_checks(word):
     # Reject words in all uppercase - they are probably acronyms
     if all([l.isupper() for l in word]):
         return True, 'all_upper'
@@ -157,39 +115,54 @@ def reject_word(word, token, locale):
     # Reject single non-alphabetic characters
     if len(word) == 1 and bool(re.search(r'[a-z]', word)):
         return True, 'single_letter'
-    
+
+    return False, None
+
+
+def reject_word(word, token, not_in_locale):
+    if token['feats'] is not None:
+        for key in BLOCK_TYPES:
+            if key in token['feats'] and token['feats'][key] == 'Yes':
+                return True, key
+
+    is_rejected, reason = basic_checks(word)
+    if is_rejected:
+        return True, reason
+
     if not word.isalnum():
         return True, 'contains_non_alphanumeric'
-    
-    if args.language != locale:
+
+    if not_in_locale:
         return True, 'wrong_locale'
 
     return False, None
 
 
-def get_vocab(text, API = None):
+def get_vocab(language_iso, text, model, port=None, API=None):
+    import conllu
     vocab = {}
     clean_text = text.replace('\n', '')
     params = {
         'tokenizer': '',
         'tagger': '',
-        'model': MODEL,
+        'model': model,
         'data': clean_text
     }
     if API is None:
-        if args.port is not None:
+        if port is not None:
             API = 'local'
         else:
             API = 'remote'
     if API == 'local':
-        endpoint = f'http://localhost:{args.port}/process'
+        endpoint = f'http://localhost:{port}/process'
     else:
         endpoint = 'https://lindat.mff.cuni.cz/services/udpipe/api/process'
     print(f'Sending request to UDPipe at {endpoint}...')
     response = requests.post(endpoint, data=params)
 
     if response.status_code != 200:
-        raise Exception(f'UDPipe request failed with status code {response.status_code} for hashed text {hash(text)} response {response.text}')
+        raise Exception(
+            f'UDPipe request failed with status code {response.status_code} for hashed text {hash(text)} response {response.text}')
     else:
         sentences = conllu.parse(json.loads(response.text)['result'])
         for sentence in sentences:
@@ -200,10 +173,11 @@ def get_vocab(text, API = None):
                 form = token['form']
                 POS = token['upostag']
                 lemma_locale_dict, lemma_locale_ft, lemma_predictions = spellcheck(lemma)
+                lemma_locale = lemma_locale_ft if fasttext_fallback else lemma_locale_dict
                 lemma_rejected, lemma_reason = reject_word(
-                    lemma, 
-                    token, 
-                    lemma_locale_ft if fasttext_fallback else lemma_locale_dict
+                    lemma,
+                    token,
+                    lemma_locale != language_iso
                 )
                 if lemma not in vocab:
                     lemma_dict = {
@@ -219,10 +193,11 @@ def get_vocab(text, API = None):
                     lemma_dict = vocab[lemma]
 
                 token_locale_dict, token_locale_ft, token_predictions = spellcheck(form)
+                token_locale = token_locale_ft if fasttext_fallback else token_locale_dict
                 token_rejected, token_reason = reject_word(
                     form,
                     token,
-                    token_locale_ft if fasttext_fallback else token_locale_dict
+                    token_locale
                 )
 
                 if form not in lemma_dict['tokens']:
@@ -242,62 +217,95 @@ def get_vocab(text, API = None):
                 vocab[lemma] = lemma_dict
     return vocab
 
-if args.language in ["got", "wo", "se", "gd", "mt", "fo", "lv", "et", "lt", "ga", "cy", "is", "mr", "la", "sk", "sa", "hyw", "be"]:
-    json_path = f'data/wikipedia_{args.language}.json'
-else:
-    json_path = f'data/wikipedia_{args.language}_10000_longest_articles.json'
 
-with open(json_path, 'r') as f:
-    data = json.load(f)
+def get_time(msg):
+    global start_time
+    print(msg + " in %s seconds" % (time.time() - start_time))
+    start_time = time.time()
 
-if args.reversed_order:
-    print('Reversing order of articles...')
-    print('Limiting to first 10,000...')
-    data = data[:10000]
-    data = data[::-1]
-n_articles = len(data)
-vocab = {}
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--language', required=True, help='ISO language code')
+    parser.add_argument('--reversed_order', default=0, type=int, help='Go through the data in reversed order', choices=[0, 1])
+    parser.add_argument('--port', default=None, help='Port for the server')
+    args = parser.parse_args()
+    args.reversed_order = bool(args.reversed_order)
 
-os.makedirs(f'json/{args.language}', exist_ok=True)
+    language_iso = args.language
 
-# Setup the connection
-for idx, row in tqdm(enumerate(data), desc=f'Processing {n_articles} wiki articles for {args.language}'):
-    if 'id' in row:
-        wiki_id = row['id']
+    import enchant
+    import fasttext
+    broker = enchant.Broker()
+    lang_list = list(set([lang.split('_')[0] for lang in broker.list_languages()]))
+    fasttext_fallback = not language_iso in lang_list
+    print("Using dictionary" if not fasttext_fallback else "Using fasttext")
+
+
+
+    assert language_iso in MODEL_MAPPING.keys(), f'Language {language_iso} not supported'
+    model = MODEL_MAPPING[language_iso]
+    print(model)
+
+    global word2spellcheck, fasttext_model
+    word2spellcheck = {}
+    fasttext_model = fasttext.load_model("fastText/lid.176.bin")
+
+
+    if language_iso in ["got", "wo", "se", "gd", "mt", "fo", "lv", "et", "lt", "ga", "cy", "is", "mr", "la", "sk", "sa", "hyw", "be"]:
+        json_path = f'data/wikipedia_{language_iso}.json'
     else:
-        wiki_id = row['wikidata_id']
+        json_path = f'data/wikipedia_{language_iso}_10000_longest_articles.json'
 
-    if 'url' in row:
-        url = row['url']
-    else:
-        url = row['version_id']
+    with open(json_path, 'r') as f:
+        data = json.load(f)
 
-    dump_file = f'json/{args.language}/vocab_{args.language}_{wiki_id}.json'
-    if os.path.exists(dump_file):
-        continue
+    if args.reversed_order:
+        print('Reversing order of articles...')
+        print('Limiting to first 10,000...')
+        data = data[:10000]
+        data = data[::-1]
+    n_articles = len(data)
 
-    # Drop footnote superscripts in brackets
-    text = row['text']
-    text = re.sub(r"\[.*?\]+", '', text)
-    text = re.sub(r"\(.*?\)+", '', text)
-    text = re.sub(r"\{.*?\}+", '', text)
-    text = text.replace('_NEWLINE_', '\n')  # _NEWLINE_
-    for remove_str in TEXT_BLOCKS:
-        text = text.replace(remove_str, '')
-    text = text.replace('\n', ' ')
+    os.makedirs(f'json/{language_iso}', exist_ok=True)
 
-    tries = 0
-    while True:
-        try:
-            tries += 1
-            if tries > 10:
+    # Set up the connection
+    for idx, row in tqdm(enumerate(data), desc=f'Processing {n_articles} wiki articles for {language_iso}'):
+        if 'id' in row:
+            wiki_id = row['id']
+        else:
+            wiki_id = row['wikidata_id']
+
+        if 'url' in row:
+            url = row['url']
+        else:
+            url = row['version_id']
+
+        dump_file = f'json/{language_iso}/vocab_{language_iso}_{wiki_id}.json'
+        if os.path.exists(dump_file):
+            continue
+
+        # Drop footnote superscripts in brackets
+        text = row['text']
+        text = re.sub(r"\[.*?\]+", '', text)
+        text = re.sub(r"\(.*?\)+", '', text)
+        text = re.sub(r"\{.*?\}+", '', text)
+        text = text.replace('_NEWLINE_', '\n')  # _NEWLINE_
+        for remove_str in TEXT_BLOCKS:
+            text = text.replace(remove_str, '')
+        text = text.replace('\n', ' ')
+
+        tries = 0
+        while True:
+            try:
+                tries += 1
+                if tries > 10:
+                    break
+                vocab = get_vocab(language_iso, text, model, args.port)
+                with open(dump_file, 'w') as f:
+                    json.dump(vocab, f)
                 break
-            vocab = get_vocab(text)
-            with open(dump_file, 'w') as f:
-                json.dump(vocab, f)
-            break
-        except:
-            time.sleep(random.randint(1, 10))
-            print(f"Error processing {wiki_id} {url}")
+            except:
+                time.sleep(random.randint(1, 10))
+                print(f"Error processing {wiki_id} {url}")
 
-print(f'Processed articles: {n_articles}')
+    print(f'Processed articles: {n_articles}')
