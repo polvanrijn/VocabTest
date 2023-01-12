@@ -63,7 +63,7 @@ def download_top_wikipedia_articles(language_iso, top_n):
 
     return data
 
-def __main__():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--language', required=True, help='ISO language code')
     parser.add_argument('--top_n', default=10000, type=int, help='N longest articles in that language')
