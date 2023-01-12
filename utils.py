@@ -1,16 +1,13 @@
+import re
 import json
+import requests
+
+from os.path import exists
 
 import pandas as pd
-import pykakasi  # Japanese
-import jamotools  # Korean
-from pypinyin import pinyin  # Chinese
-
 import numpy as np
 from tqdm import tqdm
-
-from charsplit import Splitter
 from random import sample
-from fuzzywuzzy import fuzz
 
 
 ##################################################
@@ -24,6 +21,8 @@ def character_to_letter(character, language_iso):
     :param language_iso: language iso code
     :return: converted character
     """
+    import jamotools  # Korean
+    from pypinyin import pinyin  # Chinese
     if language_iso == 'ja':
         return syllabify_japanese(character, 'hiragana')
     elif language_iso == 'zh':
@@ -34,7 +33,6 @@ def character_to_letter(character, language_iso):
         raise ValueError(f'Language not supported: {language_iso}')
 
 
-kks = pykakasi.kakasi()
 
 
 def syllabify_japanese(word, type):
@@ -44,8 +42,10 @@ def syllabify_japanese(word, type):
     :param type: either 'katakana' or 'hiragana'
     :return: syllabified word
     """
+    import pykakasi
     assert type in ['katakana', 'hiragana']
     key = 'kana' if type == 'katakana' else 'hira'
+    kks = pykakasi.kakasi()
     return ''.join([w[key] for w in kks.convert(word)])
 
 def get_padding(n_gram_len):
@@ -57,11 +57,134 @@ def get_padding(n_gram_len):
     pad_len = n_gram_len - 1
     return '*' * (pad_len)
 
+
+##################################################
+# Unicode functions
+##################################################
+arabic = ['Arabic']
+armenian = ['Armenian']
+chinese = ['CJK Unified Ideographs']
+cyrillic = ['Cyrillic', 'Cyrillic Supplement', 'Cyrillic Extended-A', 'Cyrillic Extended-B']
+devanagari = ['Devanagari']
+gothic = ['Gothic']
+greek = ['Greek and Coptic', 'Greek Extended']
+hebrew = ['Hebrew']
+japanese = ['Hiragana', 'Katakana', 'CJK Unified Ideographs']
+korean = ['Hangul Syllables']
+tamil = ['Tamil']
+telugu = ['Telugu']
+basic_latin = ['Basic Latin']
+latin_1_supplement = basic_latin + ['Latin-1 Supplement']
+latin_extended_a = latin_1_supplement + ['Latin Extended-A']
+latin_extended_a_b = latin_extended_a + ['Latin Extended-B']
+latin_extended_additional = latin_extended_a_b + ['Latin Extended Additional']  # Vietnamese
+
+lang_2_script = {
+    'af': latin_1_supplement,
+    'ar': arabic,
+    'be': cyrillic,
+    'bg': cyrillic,
+    'ca': latin_1_supplement,
+    'cs': latin_extended_a,
+    'cy': latin_extended_a,
+    'da': latin_1_supplement,
+    'de': latin_1_supplement,
+    'el': greek,
+    'en': basic_latin,
+    'es': latin_1_supplement,
+    'et': latin_extended_a,
+    'eu': latin_1_supplement,
+    'fa': arabic,
+    'fi': latin_1_supplement,
+    'fo': latin_1_supplement,
+    'fr': latin_1_supplement,
+    'ga': latin_1_supplement,
+    'gd': latin_1_supplement,
+    'gl': latin_1_supplement,
+    'got': gothic,
+    'he': hebrew,
+    'hi': devanagari,
+    'hr': latin_extended_a,
+    'hu': latin_extended_a,
+    'hy': armenian,
+    'hyw': armenian,
+    'id': basic_latin,
+    'is': latin_1_supplement,
+    'it': latin_1_supplement,
+    'ja': japanese,
+    'ko': korean,
+    'la': latin_1_supplement,
+    'lt': latin_1_supplement,
+    'lv': latin_1_supplement,
+    'mr': devanagari,
+    'mt': latin_extended_a,
+    'nl': latin_1_supplement,
+    'nn': latin_1_supplement,
+    'no': latin_1_supplement,
+    'pl': latin_extended_a,
+    'pt': latin_1_supplement,
+    'ro': latin_extended_a_b,
+    'ru': cyrillic,
+    'sa': devanagari,
+    'se': latin_extended_a,
+    'sk': latin_extended_a,
+    'sl': latin_1_supplement,
+    'sr': cyrillic,
+    'sv': latin_1_supplement,
+    'ta': tamil,
+    'te': telugu,
+    'tr': latin_extended_a,
+    'ug': arabic,
+    'uk': cyrillic,
+    'ur': arabic,
+    'vi': latin_extended_additional,
+    'wo': latin_1_supplement,
+    'zh': chinese,
+}
+
+
+def get_char_df(token_count_df):
+    unicode_blocks = []
+    pattern = re.compile(r'([0-9A-F]+)\.\.([0-9A-F]+);\ (\S.*\S)')
+    response = requests.get('http://unicode.org/Public/UNIDATA/Blocks.txt')
+
+    for line in response.text.splitlines():
+        m = pattern.match(line)
+        if m:
+            start, end, name = m.groups()
+            unicode_blocks.append((int(start, 16), int(end, 16), name))
+
+    def block(ch):
+        """
+        Return the Unicode block name for ch, or None if ch has no block.
+        """
+        assert isinstance(ch, str) and len(ch) == 1, repr(ch)
+        cp = ord(ch)
+        for start, end, name in unicode_blocks:
+            if start <= cp <= end:
+                return name
+
+    all_chars = ''.join([row['token'] * row['token_count'] for _, row in token_count_df.iterrows()])
+    char_array = [c for c in all_chars]
+    char_df = pd.Series(char_array).value_counts().reset_index()
+    char_df.columns = ['char', 'count']
+    char_df['block'] = char_df.char.apply(block)
+
+    unicode_block_table = char_df.groupby(['char', 'block'])['count'].sum().groupby('block').sum().sort_values(ascending=False).reset_index()
+    return len(char_array), char_df, unicode_block_table
+
+
+def in_accepted_script(token, accepted_scripts, char_df):
+    char2block = dict(zip(char_df.char, char_df.block))
+    return all([char2block[c] in accepted_scripts for c in token])
+
+
 ##################################################
 # Conditional probabilities
 ##################################################
 
 def expand_lemmas(noun_df, language_iso):
+    noun_df = noun_df.iloc[[i for i, lemma in enumerate(noun_df.lemma) if type(lemma) == str], :]
     is_cjk = language_iso in ['zh', 'ja', 'ko']
     primitives_to_character = {}
     if is_cjk:
@@ -239,6 +362,8 @@ def validate_pseudoword(
         n_letters_not_replaced = sum([c in old_word for c in pseudoword])
         if n_letters_not_replaced > 0:
             return False, 'Not all letters replaced'
+        if pseudoword in block_set:
+            return False, 'Replaced word already in token/lemma list'
     else:
         if is_compound_word(pseudoword, language_iso, lemma_set):
             return False, 'Compound word'
@@ -255,6 +380,14 @@ def is_compound_word(word, language_iso, lemma_set):
     :param lemma_set:
     :return: True if word is a compound word, False otherwise
     """
+    from charsplit import Splitter, train_splitter, get_ngram_filepath
+    if not exists(get_ngram_filepath(language_iso)):
+        lemma_df = pd.read_csv(f'databases/{language_iso}-lemma_df.csv')
+        accepted_nouns = lemma_df.query(f'POS=="NOUN" and accepted == True')
+        accepted_nouns = accepted_nouns.iloc[[i for i, lemma in enumerate(accepted_nouns.lemma) if type(lemma) == str], :]
+        noun_tuples = [tuple(l) for l in accepted_nouns[['lemma', 'lemma_count']].values]
+        train_splitter(noun_tuples, language_iso)
+
     splitter = Splitter(language_iso)
     cuts = splitter.split_compound(word)
     if len(cuts) > 1:
@@ -273,6 +406,8 @@ def get_max_match(word, blocklist, fix_len=3):
     :param fix_len: number of letters to check at the beginning and end of the word
     :return: maximum match score, None if the word is smaller than fix_len or if no match is found
     """
+    from fuzzywuzzy import fuzz
+
     word_len = len(word)
     if word_len < fix_len:
         return None
@@ -294,7 +429,11 @@ def get_max_match(word, blocklist, fix_len=3):
 
 def create_block_set(language_iso):
     dump = pd.read_csv(f'databases/{language_iso}.csv')
-    block_set = set(list(set(dump.token)) + list(set(dump.lemma)))
+    token_df = pd.read_csv(f'databases/{language_iso}-token_df.csv')
+    block_set = set(
+        list(set(dump.token)) + list(set(dump.lemma)) +
+        list(set(token_df.token)) + list(set(token_df.lemma))
+    )
     block_set = {word for word in block_set if type(word) == str}
     with open(f'databases/{language_iso}-meta.json', 'r') as f:
         meta = json.load(f)
