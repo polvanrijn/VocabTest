@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<!-- Based on GPLv3-licensed code at https://bl.ocks.org/mbostock/4063550
+  Modified by Andrew Su on 2016-05-23 -->
+
+
+
+
+<meta charset="utf-8">
+<link type="text/css" href="tree_colors.css" rel="stylesheet"/>
+<style>
+
+    .node.level1 circle {
+        stroke-width: 10px;
+    }
+
+    .node.level2 circle {
+        stroke-width: 0px;
+    }
+
+    .node {
+        font: 0px sans-serif;
+    }
+
+    .node.level1 {
+        font: 10px sans-serif;
+        opacity: 1.0
+    }
+
+    .node.level2 {
+        font: 0px sans-serif;
+        opacity: 0.8
+    }
+
+    .node.level3 {
+        font: 0px sans-serif;
+        opacity: 0.6
+    }
+
+    .node.level4 {
+        opacity: 0.4
+    }
+
+    .node.level5 {
+        opacity: 0.2
+    }
+
+    .node.level6 {
+        opacity: 0.1
+    }
+
+    .link {
+        fill: none;
+        stroke-width: 1.5px;
+    }
+
+    .node circle {
+  stroke: #037e8c;
+  fill: #037e8c;
+}
+
+</style>
+<body>
+<div>
+    <div id="label"></div>
+    <div id="chart"></div>
+</div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+    var diameter = 2000;
+    var jitterSize = [35, 70, 105, 105, 105, 105, 105];
+
+    function jitter(node, level) {
+        if (node.children === undefined)
+            return;
+
+        node.children.forEach(function (n, i) {
+
+            n.y = n.y + Math.random() * jitterSize[level] - jitterSize[level] / 2;
+
+            jitter(n, level + 1);
+        });
+    }
+
+    var tree = d3.layout.tree()
+        .size([360, diameter / 2 - 200])
+        .separation(function (a, b) {
+            return (a.parent == b.parent ? 1 : 2) / a.depth;
+        });
+
+    var diagonal = d3.svg.diagonal.radial()
+        .projection(function (d) {
+            return [d.y, d.x / 180 * Math.PI];
+        });
+
+    var svg = d3.select("#chart").append("svg")
+        .attr("width", diameter)
+        .attr("height", diameter - 150)
+        .call(d3.behavior.zoom().on("zoom", function () {
+            svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+        }))
+        .append("g")
+        .attr("transform", "translate(" + diameter / 2 + "," + (diameter / 2) + ")");
+
+    d3.json("./tree.json", function (error, root) {
+        if (error) throw error;
+
+        var nodes = tree.nodes(root),
+            links = tree.links(nodes);
+
+        // jitter(root, 0)
+
+        var link = svg.selectAll(".link")
+            .data(links)
+            .enter().append("path")
+            //      .attr("class", "link ucb")
+            .attr("d", diagonal)
+            .attr("class", function (d) {
+                return "link ".concat(d.location)
+            });
+
+        var node = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", function (d) {
+                return "node level".concat(d.level)
+            })
+            //      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + ( d.y +  Math.random() * 50 - 25  ) + ")"; })
+            //      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + ( d.y  ) + ")"; })
+            .attr("transform", function (d) {
+                return "rotate(" + (d.x - 90) + ")translate(" + (d.y) + ")";
+            })
+            .on("mouseover", function (d) {
+                document.getElementById("label").innerHTML = d.name
+                console.log(d);
+                d3.select(this).select("circle").transition()
+                    .duration(75)
+                    .attr("r", 16.5);
+            })
+            .on("mouseout", function (d) {
+                d3.select(this).select("circle").transition()
+                    .duration(75)
+                    .attr("r", 4.5);
+            });
+
+
+        node.append("circle")
+            .attr("r", 4.5)
+            .call(d3.behavior.zoom().on("zoom", function () {
+            console.log(d3.event.translate, d3.event.scale);
+            node.attr("r", 10 / d3.event.scale)
+        }))
+            .attr("class", function (d) {
+                return d.type
+            });
+
+        node.append("text")
+            .attr("dy", ".31em")
+            .attr("text-anchor", function (d) {
+                return d.x < 180 ? "start" : "end";
+            })
+            .attr("transform", function (d) {
+                return d.x < 180 ? "translate(-8)" : "rotate(180)translate(8)";
+            })
+            .text(function (d) {
+                return d.name;
+            });
+
+    });
+
+    d3.select(self.frameElement).style("height", diameter - 150 + "px");
+
+</script>
+

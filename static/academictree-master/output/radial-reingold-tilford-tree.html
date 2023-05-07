@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<!-- Based on GPLv3-licensed code at https://bl.ocks.org/mbostock/4063550
+  Modified by Andrew Su on 2016-05-23 -->
+
+
+<meta charset="utf-8">
+<link type="text/css" href="tree_colors.css" rel="stylesheet"/>
+<style>
+
+/* color scheme based on https://color.adobe.com/Adobe-Ideas-Theme-color-theme-3630806/?showPublished=true */
+
+.node.level1 circle {
+  stroke-width: 50px;
+}
+.node.level2 circle {
+  stroke-width: 20px;
+}
+
+.node {
+  font: 0px sans-serif;
+}
+.node.level1 {
+  font: 40px sans-serif;
+  opacity: 1.0
+}
+.node.level2 {
+  font: 0px sans-serif;
+  opacity: 0.8
+}
+.node.level3 {
+  font: 0px sans-serif;
+  opacity: 0.6
+}
+.node.level4 {
+  opacity: 0.4
+}
+.node.level5 {
+  opacity: 0.2
+}
+.node.level6 {
+  opacity: 0.1
+}
+
+.link {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var diameter = 2500;
+
+var tree = d3.layout.tree()
+    .size([360, diameter / 2 - 120])
+    .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+
+var diagonal = d3.svg.diagonal.radial()
+    .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter - 150)
+  .append("g")
+    .attr("transform", "translate(" + diameter / 2 + "," + (diameter / 3 + 100) + ")");
+
+d3.json("./tree.json", function(error, root) {
+  if (error) throw error;
+
+  console.log(root)
+
+  var nodes = tree.nodes(root),
+      links = tree.links(nodes);
+
+  var link = svg.selectAll(".link")
+      .data(links)
+    .enter().append("path")
+//      .attr("class", "link ucb")
+      .attr("d", diagonal)
+      .attr("class", function(d) { console.log(d); return "link ".concat(d.location)} );
+
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("g")
+      .attr("class", function(d) { return "node level".concat(d.level) } )
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+  node.append("circle")
+      .attr("r", 4.5)
+      .attr("class", function(d) { return d.type} );
+
+  node.append("text")
+      .attr("dy", ".31em")
+      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+      .text(function(d) { console.log(d); return d.name; });
+      
+});
+
+d3.select(self.frameElement).style("height", diameter - 150 + "px");
+
+
+</script>
+

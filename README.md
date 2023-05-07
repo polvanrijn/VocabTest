@@ -1,93 +1,21 @@
-# 📖 WikiVocab
-#### Generative vocabulary test for 60 languages, supporting > 10 writing systems
+# 📖 VocabTest
+#### Vocabulary tests for an open-ended number of 60 languages (here ~2k)
 **TD;DR**: Vocabulary tests are useful to assess if someone is a native speaker of a language. This repository allows to quickly test vocabulary knowledge for 60 lanugages. 📝 [Try the test yourself](https://polvanrijn.github.io/WikiVocab/index.html)
 *********
 
-```
-TODO put on Arxiv
-```
-[![arXiv](https://img.shields.io/badge/arXiv-2203.15379-b31b1b.svg)](https://arxiv.org/abs/2203.15379)
-
-> **Abstract**
->
-> TODO
-
-
-## Data
-| Language                 | ISO  | Size | Dictionary | Demo | Word lists |
-| ------------------------ | ---- | ---- | ---------- | ---- | ---------- |
-| Afrikaans 🇿🇦             | af   | ✅    | ✅          | 🔗    | 📄          |
-| Arabic (many countries)  | ar   | ✅    | ✅          | 🔗    | 📄          |
-| Belarussian 🇧🇾           | be   | ✅    | ✅          | 🔗    | 📄          |
-| Bulgarian 🇧🇬             | bg   | ✅    | ✅          | 🔗    | 📄          |
-| Catalan 🇪🇸               | ca   | ✅    | ✅          | 🔗    | 📄          |
-| Czech 🇨🇿                 | cs   | ✅    | ✅          | 🔗    | 📄          |
-| Welsh 🇬🇧                 | cy   | ✅    | ✅          | 🔗    | 📄          |
-| Danish 🇩🇰                | da   | ✅    | ✅          | 🔗    | 📄          |
-| German 🇩🇪🇨🇭🇦🇹            | de   | ✅    | ✅          | 🔗    | 📄          |
-| Greek 🇬🇷                 | el   | ✅    | ✅          | 🔗    | 📄          |
-| English (many countries) | en   | ✅    | ✅          | 🔗    | 📄          |
-| Spanish (many countries) | es   | ✅    | ✅          | 🔗    | 📄          |
-| Estionian 🇪🇪             | et   | ✅    | ✅          | 🔗    | 📄          |
-| Basque 🇪🇸                | eu   | ✅    | ✅          | 🔗    | 📄          |
-| Persian 🇮🇷🇦🇫🇹🇯           | fa   | ✅    | ✅          | 🔗    | 📄          |
-| Finnish 🇫🇮               | fi   | ✅    | ✅          | 🔗    | 📄          |
-| Faroese 🇩🇰               | fo   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| French (many countries)  | fr   | ✅    | ✅          | 🔗    | 📄          |
-| Irish 🇮🇪                 | ga   | ✅    | ⚠️          | 🔗    | 📄          |
-| Gaelic (Scottish) 🏴󠁧󠁢󠁳󠁣󠁴󠁿      | gd   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Galician 🇪🇸              | gl   | ✅    | ⚠️          | 🔗    | 📄          |
-| Gothic (dead)            | got  | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Hebrew 🇮🇱                | he   | ✅    | ✅          | 🔗    | 📄          |
-| Hindi 🇮🇳                 | hi   | ✅    | ✅          | 🔗    | 📄          |
-| Croatian 🇭🇷              | hr   | ✅    | ✅          | 🔗    | 📄          |
-| Hungarian 🇭🇺             | hu   | ✅    | ✅          | 🔗    | 📄          |
-| Armenian 🇦🇲              | hy   | ✅    | ✅          | 🔗    | 📄          |
-| Western Armenian         | hyw  | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Indonesia 🇮🇩             | id   | ✅    | ✅          | 🔗    | 📄          |
-| Icelandic 🇮🇸             | is   | ✅    | ✅          | 🔗    | 📄          |
-| Italian 🇮🇹               | it   | ✅    | ✅          | 🔗    | 📄          |
-| Japanese 🇯🇵              | ja   | ✅    | ✅          | 🔗    | 📄          |
-| Korean 🇰🇷                | ko   | ✅    | ✅          | 🔗    | 📄          |
-| Latin (dead)             | la   | ✅    | ⚠️          | 🔗    | 📄          |
-| Lithuania 🇱🇹             | lt   | ✅    | ✅          | 🔗    | 📄          |
-| Latvian 🇱🇻               | lv   | ✅    | ✅          | 🔗    | 📄          |
-| Marathi 🇮🇳               | mr   | ✅    | ✅          | 🔗    | 📄          |
-| Maltanese 🇲🇹             | mt   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Dutch 🇳🇱🇧🇪               | nl   | ✅    | ✅          | 🔗    | 📄          |
-| Norwegian Nynorsk 🇳🇴     | nn   | ✅    | ⚠️          | 🔗    | 📄          |
-| Norwegian Bokmål 🇳🇴      | no   | ✅    | ✅          | 🔗    | 📄          |
-| Polish 🇵🇱                | pl   | ✅    | ✅          | 🔗    | 📄          |
-| Portuguese 🇵🇹            | pt   | ✅    | ✅          | 🔗    | 📄          |
-| Romanian 🇷🇴              | ro   | ✅    | ✅          | 🔗    | 📄          |
-| Russian 🇷🇺               | ru   | ✅    | ✅          | 🔗    | 📄          |
-| Sanskrit 🇮🇳              | sa   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Northern Sami 🇳🇴         | se   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Slovak 🇸🇰                | sk   | ✅    | ✅          | 🔗    | 📄          |
-| Slovenian 🇸🇮             | sl   | ✅    | ✅          | 🔗    | 📄          |
-| Serbian 🇷🇸               | sr   | ✅    | ✅          | 🔗    | 📄          |
-| Swedish 🇸🇪               | sv   | ✅    | ✅          | 🔗    | 📄          |
-| Tamil 🇮🇳🇱🇰🇸🇬             | ta   | ✅    | ✅          | 🔗    | 📄          |
-| Telugu 🇮🇳                | te   | ✅    | ✅          | 🔗    | 📄          |
-| Turkish 🇹🇷               | tr   | ✅    | ✅          | 🔗    | 📄          |
-| Uyghur 🇨🇳                | ug   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Ukranian 🇺🇦              | uk   | ✅    | ✅          | 🔗    | 📄          |
-| Urdu 🇵🇰🇮🇳                | ur   | ✅    | ✅          | 🔗    | 📄          |
-| Vietnamese 🇻🇳            | vi   | ✅    | ✅          | 🔗    | 📄          |
-| Wolof 🇸🇳                 | wo   | ⚠️    | ⚠️          | 🔗    | 📄          |
-| Chinese 🇨🇳               | zh   | ✅    | ✅          | 🔗    | 📄          |
-
-*Legend: **Size** ✅ = collected ≥ 5 million valid tokens, ⚠️ = less tokens are collected, indicating the frequency estimates might be irreliable. **Dictionary** ✅ = all words are spellchecked, ⚠️ = less than 35% of the tokens could be spellchecked; we include all words without spellchecking.*
 
 ## Setup
 Clone the repository and install the requirements:
-```
-git clone https://github.com/polvanrijn/WikiVocab
-cd WikiVocab
+```shell
+git clone https://github.com/polvanrijn/VocabTest
+cd VocabTest
 REPO_DIR=$(pwd)
 pip install -r requirements.txt
+cd dependencies
+DEPENDENCIES_DIR=$(pwd)
 ```
 
+### Install dependencies
 <details>
 <summary><b>Optionally: Install dictionaries</b></summary>
 
@@ -152,7 +80,7 @@ print(sorted(list(set([lang.split('_')[0] for lang in broker.list_languages()]))
 <summary><b>Optionally: Install FastText</b></summary>
 
 ```shell
-cd $REPO_DIR
+cd $DEPENDENCIES_DIR
 git clone https://github.com/facebookresearch/fastText.git
 cd fastText
 pip3 install .
@@ -204,7 +132,7 @@ The full pipeline consists of three main parts:
 - Create and filter vocabulary
 - Create pseudowords
 
-### Extract and collect text
+### Extract and collect texts
 Here we use the longest Wikipedia articles from a given language, but you could have taken any other large text corpus (👉 read the paper to find out why we took Wikipedia). Each token is lemmatized and POS-tagged using UDPipe 2. For spellchecking we used FastText and manually installed dictionaries.
 
 ```shell
@@ -229,7 +157,12 @@ python create_pseudowords.py --language $LANG # default is 5-grams
 python pair_pseudowords.py --language $LANG
 ```
 
+
 ### Citation
 ```
 # TODO
 ```
+
+### TODOs
+- [ ] Set MANIFEST.in
+- [ ] Update READMEs

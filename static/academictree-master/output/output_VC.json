@@ -1,0 +1,255 @@
+{
+  "ID": "62876",
+  "FirstName": "Virginia",
+  "MiddleName": "W.",
+  "LastName": "Cornish",
+  "level": 1,
+  "year": ["1993", "2014"],
+  "name": "VWC",
+  "url": "http://academictree.org/chemistry/peopleinfo.php?pid=62876",
+  "children": [
+    {
+      "ID": "85317",
+      "FirstName": "Zhongping",
+      "MiddleName": "",
+      "LastName": "Tan",
+      "level": 2,
+      "year": ["2008", "2012"],
+      "name": "ZT",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=85317",
+      "children": [
+        {
+          "ID": "85314",
+          "FirstName": "XIAOYANG",
+          "MiddleName": "",
+          "LastName": "GUAN",
+          "level": 3,
+          "year": "2002",
+          "name": "XG",
+          "url": "http://academictree.org/chemistry/peopleinfo.php?pid=85314",
+          "children": [],
+          "type": "postdoc"
+        }
+      ],
+      "type": "student"
+    },
+    {
+      "ID": "142085",
+      "FirstName": "Debleena",
+      "MiddleName": "",
+      "LastName": "Sengupta",
+      "level": 2,
+      "year": "2011",
+      "name": "DS",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142085",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142088",
+      "FirstName": "Sarah",
+      "MiddleName": "S",
+      "LastName": "Gallagher",
+      "level": 2,
+      "year": "2011",
+      "name": "SSG",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142088",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142083",
+      "FirstName": "Shalom",
+      "MiddleName": "D",
+      "LastName": "Goldberg",
+      "level": 2,
+      "year": "2010",
+      "name": "SDG",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142083",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "85317",
+      "FirstName": "Zhongping",
+      "MiddleName": "",
+      "LastName": "Tan",
+      "level": 2,
+      "year": ["2008", "2012"],
+      "name": "ZT",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=85317",
+      "children": [
+        {
+          "ID": "85314",
+          "FirstName": "XIAOYANG",
+          "MiddleName": "",
+          "LastName": "GUAN",
+          "level": 3,
+          "year": "2002",
+          "name": "XG",
+          "url": "http://academictree.org/chemistry/peopleinfo.php?pid=85314",
+          "children": [],
+          "type": "postdoc"
+        }
+      ],
+      "type": "student"
+    },
+    {
+      "ID": "142089",
+      "FirstName": "Philip",
+      "MiddleName": "R",
+      "LastName": "Effraim",
+      "level": 2,
+      "year": "2007",
+      "name": "PRE",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142089",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142092",
+      "FirstName": "Matthew",
+      "MiddleName": "D",
+      "LastName": "Merguerian",
+      "level": 2,
+      "year": "2003",
+      "name": "MDM",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142092",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142084",
+      "FirstName": "Brian",
+      "MiddleName": "T",
+      "LastName": "Carter",
+      "level": 2,
+      "year": "2001",
+      "name": "BTC",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142084",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142093",
+      "FirstName": "Zhixing",
+      "MiddleName": "",
+      "LastName": "Chen",
+      "level": 2,
+      "year": "1995",
+      "name": "ZC",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142093",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142090",
+      "FirstName": "Laura",
+      "MiddleName": "M",
+      "LastName": "Wingler",
+      "level": 2,
+      "year": "1994",
+      "name": "LMW",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142090",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "86954",
+      "FirstName": "Scott",
+      "MiddleName": "T.",
+      "LastName": "Lefurgy",
+      "level": 2,
+      "year": "1992",
+      "name": "STL",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=86954",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142086",
+      "FirstName": "Haiyan",
+      "MiddleName": "",
+      "LastName": "Tao",
+      "level": 2,
+      "year": "1986",
+      "name": "HT",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142086",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "63525",
+      "FirstName": "Hening",
+      "MiddleName": "",
+      "LastName": "Lin",
+      "level": 2,
+      "year": "1982",
+      "name": "HL",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=63525",
+      "children": [
+        {
+          "ID": "81950",
+          "FirstName": "Ying-Ling",
+          "MiddleName": "",
+          "LastName": "Chiang",
+          "level": 3,
+          "year": "2011",
+          "name": "YC",
+          "url": "http://academictree.org/chemistry/peopleinfo.php?pid=81950",
+          "children": [],
+          "type": "postdoc"
+        },
+        {
+          "ID": "142977",
+          "FirstName": "Xuling",
+          "MiddleName": "",
+          "LastName": "Zhu",
+          "level": 3,
+          "year": "1989",
+          "name": "XZ",
+          "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142977",
+          "children": [],
+          "type": "student"
+        },
+        {
+          "ID": "142978",
+          "FirstName": "Xiaoyang",
+          "MiddleName": "",
+          "LastName": "Su",
+          "level": 3,
+          "year": "1985",
+          "name": "XS",
+          "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142978",
+          "children": [],
+          "type": "student"
+        }
+      ],
+      "type": "student"
+    },
+    {
+      "ID": "142091",
+      "FirstName": "Nili",
+      "MiddleName": "",
+      "LastName": "Ostrov",
+      "level": 2,
+      "year": "1982",
+      "name": "NO",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142091",
+      "children": [],
+      "type": "student"
+    },
+    {
+      "ID": "142087",
+      "FirstName": "Pamela",
+      "MiddleName": "P",
+      "LastName": "Peralta-Yahya",
+      "level": 2,
+      "year": "1981",
+      "name": "PPP",
+      "url": "http://academictree.org/chemistry/peopleinfo.php?pid=142087",
+      "children": [],
+      "type": "student"
+    }
+  ]
+}

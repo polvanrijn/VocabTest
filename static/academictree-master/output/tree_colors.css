@@ -1,0 +1,235 @@
+/* color scheme based on https://color.adobe.com/Adobe-Ideas-Theme-color-theme-3630806/?showPublished=true */
+
+body {
+  background: #f2efdc;
+}
+
+.link {
+  stroke: #024959;
+  opacity: 0.5;
+  stroke-width: 2px; /* desired stroke width (line height) */
+  vector-effect: non-scaling-stroke; /* line height won't scale*/
+}
+
+.node circle {
+  vector-effect: non-scaling-size; /* line height won't scale*/
+}
+
+.node circle.student {
+  stroke: #037e8c;
+  fill: #037e8c;
+}
+
+.node circle.postdoc {
+  stroke: #f24c27;
+  fill:#f24c27;
+}
+
+.node circle.researchscientist {
+  stroke: #f24c27;
+  fill:#f24c27;
+}
+
+.node circle.company {
+  stroke: #404040;
+  fill: #404040;
+}
+
+
+/* color scheme based on https://color.adobe.com/afternoon-chai-color-theme-222656/?showPublished=true */
+/* YUCK */
+/*
+body {
+  background: #FFF6C5;
+}
+
+.link {
+  stroke: #CFC291;
+}
+
+.node circle.student {
+  stroke: #A1E8D9;
+  fill: #A1E8D9;
+}
+.node circle.postdoc {
+  stroke: #FF712C;
+  fill:#FF712C;
+}
+.node circle.company {
+  stroke: #695D46;
+  fill: #695D46;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/Tearing-Away-color-theme-4467234/?showPublished=true */
+/* NOPE */
+/*
+
+body {
+  background: #F4EED8;
+}
+
+.link {
+  stroke: #F9E270;
+}
+
+.node circle.student {
+  stroke: #76D6D2;
+  fill: #76D6D2;
+}
+.node circle.postdoc {
+  stroke: #EF6F56;
+  fill:#EF6F56;
+}
+.node circle.company {
+  stroke: #596B56;
+  fill: #596B56;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/first-impressions-color-theme-13575/?showPublished=true */
+/* NOPE */
+/*
+body {
+  background: #E4F8FF;
+}
+
+.link {
+  stroke: #FFF0A3;
+}
+
+.node circle.student {
+  stroke: #B8CC6E;
+  fill: #B8CC6E;
+}
+.node circle.postdoc {
+  stroke: #4B6000;
+  fill:#4B6000;
+}
+.node circle.company {
+  stroke: #004460;
+  fill: #004460;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/Business-Casual-color-theme-5595/?showPublished=true */
+/*
+body {
+  background: #F4EFDC;
+}
+
+.link {
+  stroke: #BA9B65;
+}
+
+.node circle.student {
+  stroke: #799AE0;
+  fill: #799AE0;
+}
+.node circle.postdoc {
+  stroke: #365FB7;
+  fill:#365FB7;
+}
+.node circle.company {
+  stroke: #133463;
+  fill: #133463;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/Hipster-Haven-color-theme-3056513/?showPublished=true */
+/* bg too dark */
+/*
+body {
+  background: #D6CCAD;
+}
+
+.link {
+  stroke: #74A588;
+}
+
+.node circle.student {
+  stroke: #DC9C76;
+  fill: #DC9C76;
+}
+.node circle.postdoc {
+  stroke: #D6655A;
+  fill:#D6655A;
+}
+.node circle.company {
+  stroke: #42282F;
+  fill: #42282F;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/Copy-of-vintage-card-color-theme-3065107/?showPublished=true */
+/* +1 */
+/*
+body {
+  background: #F2EBBF;
+}
+
+.link {
+  stroke: #F3B562;
+}
+
+.node circle.student {
+  stroke: #F06060;
+  fill: #F06060;
+}
+.node circle.postdoc {
+  stroke: #5C4B51;
+  fill:#5C4B51;
+}
+.node circle.company {
+  stroke: #8CBEB2;
+  fill: #8CBEB2;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/21-Flat-Business-Icons-color-theme-3375340/?showPublished=true */
+/*
+body {
+  background: #FCF2D7;
+}
+
+.link {
+  stroke: #FDC536;
+}
+
+.node circle.student {
+  stroke: #343844;
+  fill: #343844;
+}
+.node circle.postdoc {
+  stroke: #2AB69D;
+  fill:#2AB69D;
+}
+.node circle.company {
+  stroke: #E65848;
+  fill: #E65848;
+}
+*/
+
+/* color scheme based on https://color.adobe.com/summer-catalog-v04-color-theme-64568/?showPublished=true */
+/*
+body {
+  background: #F5EEDC;
+}
+
+.link {
+  stroke: #F0986C;
+}
+
+.node circle.student {
+  stroke: #70A0BF;
+  fill: #70A0BF;
+}
+.node circle.postdoc {
+  stroke: #2D6891;
+  fill:#2D6891;
+}
+.node circle.company {
+  stroke: #DC4C1A;
+  fill: #DC4C1A;
+}
+*/

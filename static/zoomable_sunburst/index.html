@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+
+
+
+
+<style>
+
+path {
+  stroke: #fff;
+}
+
+</style>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>Pick a vocabulary test</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <form>
+                <div class="mb-3">
+                    <input type="email" class="form-control" id="exampleInputEmail1"
+                           placeholder="Start typing the language and pick it from the list">
+                    <div id="emailHelp" class="form-text">The selected language will also show up below</div>
+                </div>
+            </form>
+            <span>You are currently looking at <strong id="path">root</strong></span>
+            <div id="tree-container"></div>
+        </div>
+    </div>
+</div>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var width = 600,
+    height = 600,
+    radius = (Math.min(width, height) / 2) - 10;
+
+var formatNumber = d3.format(",d");
+
+var x = d3.scale.linear()
+    .range([0, 2 * Math.PI]);
+
+var y = d3.scale.sqrt()
+    .range([0, radius]);
+
+var color = d3.scale.category20c();
+
+var partition = d3.layout.partition()
+    .value(function(d) { return d.size; });
+
+var arc = d3.svg.arc()
+    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+    .innerRadius(function(d) { return Math.max(0, y(d.y)); })
+    .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+var svg = d3.select("#tree-container").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
+
+d3.json("tree.json", function(error, root) {
+  if (error) throw error;
+
+  svg.selectAll("path")
+      .data(partition.nodes(root))
+    .enter().append("path")
+      .attr("d", arc)
+      .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+      .on("click", click)
+    .append("title")
+      .text(function(d) { return d.name + "\n" + formatNumber(d.value); });
+});
+
+function get_parent_name(d){
+    $("#path").text(d.name)
+}
+
+var test;
+
+function click(d) {
+    document.getElementById('path').innerHTML = d.name
+  svg.transition()
+      .duration(750)
+      .tween("scale", function() {
+        var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+            yd = d3.interpolate(y.domain(), [d.y, 1]),
+            yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+        return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); };
+      })
+    .selectAll("path")
+      .attrTween("d", function(d) { return function() { return arc(d); }; });
+}
+
+d3.select(self.frameElement).style("height", height + "px");
+
+</script>
