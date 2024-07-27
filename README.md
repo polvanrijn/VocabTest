@@ -1,8 +1,10 @@
 # 📖 VocabTest
-#### Vocabulary tests for an open-ended number of 60 languages (here ~2k)
-**TD;DR**: Vocabulary tests are useful to assess if someone is a native speaker of a language. This repository allows to quickly test vocabulary knowledge for 60 lanugages. 📝 [Try the test yourself](https://polvanrijn.github.io/WikiVocab/index.html)
+#### Vocabulary tests for an open-ended number of languages
+**TD;DR**: Vocabulary tests are useful to assess language proficiency. This repository allows create vocabulary. 📝 [Try your vocabulary knowledge](https://vocabtest.org)
 *********
 
+
+![example items from WikiVocab](static/wikivocab-preview.gif)
 
 ## Setup
 Clone the repository and install the requirements:
@@ -10,12 +12,13 @@ Clone the repository and install the requirements:
 git clone https://github.com/polvanrijn/VocabTest
 cd VocabTest
 REPO_DIR=$(pwd)
+python3.9 -m venv env  # Setup virtual environment, I used Python 3.9.18 on MacOS
 pip install -r requirements.txt
-cd dependencies
-DEPENDENCIES_DIR=$(pwd)
+pip install -e .
 ```
 
-### Install dependencies
+### Developer requirements
+
 <details>
 <summary><b>Optionally: Install dictionaries</b></summary>
 
@@ -80,7 +83,7 @@ print(sorted(list(set([lang.split('_')[0] for lang in broker.list_languages()]))
 <summary><b>Optionally: Install FastText</b></summary>
 
 ```shell
-cd $DEPENDENCIES_DIR
+cd $REPO_DIR
 git clone https://github.com/facebookresearch/fastText.git
 cd fastText
 pip3 install .
@@ -126,43 +129,124 @@ if not hasattr(socket, 'SO_REUSEPORT'):
 ```
 </details>
 
-## Running
-The full pipeline consists of three main parts:
-- Extract and collect text
-- Create and filter vocabulary
-- Create pseudowords
+<details>
+<summary><b>Optionally: Word alignment</b></summary>
 
-### Extract and collect texts
-Here we use the longest Wikipedia articles from a given language, but you could have taken any other large text corpus (👉 read the paper to find out why we took Wikipedia). Each token is lemmatized and POS-tagged using UDPipe 2. For spellchecking we used FastText and manually installed dictionaries.
-
-```shell
-LANG=de # language code
-python download_articles.py --language $LANG
-python process_articles.py --language $LANG
+```{shell}
+cd $REPO_DIR/vocabtest/bible/
+mkdir dependencies
+cd dependencies
+git clone https://github.com/clab/fast_align
+cd fast_align
+mkdir build
+cd build
+cmake ..
+make
 ```
+</details>
 
-### Create and filter vocabulary
-Each processed article is stored as a single json file. We first merge the single processed articles into one file (our vocabulary). We now apply various filter the vocabulary, e.g. only include spell-checked nouns (see paper for all details).
+<details>
+<summary><b>Optionally: Uromanize</b></summary>
 
-```shell
-python create_vocabulary.py --language $LANG
-python filter_vocabulary.py --language $LANG
+```bash
+cd vocabtest/vocabtest/bible/dependencies/
+git clone https://github.com/isi-nlp/uroman
 ```
+</details>
 
-### Create pseudowords
-From the curated vocabulary we can compute conditional probabilities of the n-grams (default: 5-grams). We can now sample pseudowords from the conditional probabilities of the n-grams. Once a pseudoword is created, we apply some filters. For example, the pseudoword may not occur in the vocabulary. The sampling speed depends on the language (e.g., some languages tend to mainly produce pseudowords which are already in the vocabulary). We stop the sampling after 8 hours, which gives sufficient (> 500) pseudowords. We pair each pseudoword with its closest real word.
+## Tests
 
+### WikiVocab: Validated vocabulary test for 60 languages
+1. Afrikaans 🇿🇦
+1. Arabic (many countries)
+1. Belarussian 🇧🇾
+1. Bulgarian 🇧🇬
+1. Catalan 🇪🇸
+1. Czech 🇨🇿
+1. Welsh 🇬🇧
+1. Danish 🇩🇰
+1. German 🇩🇪🇨🇭🇦🇹
+1. Greek 🇬🇷
+1. English (many countries)
+1. Spanish (many countries)
+1. Estionian 🇪🇪
+1. Basque 🇪🇸
+1. Persian 🇮🇷🇦🇫🇹🇯
+1. Finnish 🇫🇮
+1. Faroese 🇩🇰
+1. French (many countries)
+1. Irish 🇮🇪
+1. Gaelic (Scottish) 🏴󠁧󠁢󠁳󠁣󠁴󠁿
+1. Galician 🇪🇸
+1. Gothic (dead)
+1. Hebrew 🇮🇱
+1. Hindi 🇮🇳
+1. Croatian 🇭🇷
+1. Hungarian 🇭🇺
+1. Armenian 🇦🇲
+1. Western Armenian
+1. Indonesia 🇮🇩
+1. Icelandic 🇮🇸
+1. Italian 🇮🇹
+1. Japanese 🇯🇵
+1. Korean 🇰🇷
+1. Latin (dead)
+1. Lithuania 🇱🇹
+1. Latvian 🇱🇻
+1. Marathi 🇮🇳
+1. Maltese 🇲🇹
+1. Dutch 🇳🇱🇧🇪
+1. Norwegian Nynorsk 🇳🇴
+1. Norwegian Bokmål 🇳🇴
+1. Polish 🇵🇱
+1. Portuguese 🇵🇹
+1. Romanian 🇷🇴
+1. Russian 🇷🇺
+1. Sanskrit 🇮🇳
+1. Northern Sami 🇳🇴
+1. Slovak 🇸🇰
+1. Slovenian 🇸🇮
+1. Serbian 🇷🇸
+1. Swedish 🇸🇪
+1. Tamil 🇮🇳🇱🇰🇸🇬
+1. Telugu 🇮🇳
+1. Turkish 🇹🇷
+1. Uyghur 🇨🇳
+1. Ukranian 🇺🇦
+1. Urdu 🇵🇰🇮🇳
+1. Vietnamese 🇻🇳
+1. Wolof 🇸🇳
+1. Chinese 🇨🇳
+
+### BibleVocab: Vocabulary test for more than 2000 languages
+
+
+## Create your own vocabulary test
+Creating your own vocabulary test is easy. The only thing you need is a large amount of text in a language and need to implement two functions:
+- `vocabtest.<your_dataset>.download`: which downloads the dataset and stores it in a subfolder called `data`
+- `vocabtest.<your_dataset>.filter`: which filters and cleans the dataset and stores the following files in the `database` subfolder:
+    - `{language_id}-filtered.csv` is a table with `word` and `count` of all words that pass the filter,
+    - `{language_id}-clean.txt` is text file with all words that are cleaned, which is used for training the compound word splitter,
+    - `{language_id}-all.txt` is text file with all words occurring in the corpus, which is used to reject pseudowords which are already in the corpus
+
+You can now run your vocabulary test with:
 ```shell
-python create_pseudowords.py --language $LANG # default is 5-grams
-python pair_pseudowords.py --language $LANG
+vocabtest download <your_dataset> <language_id>
+vocabtest filter <your_dataset> <language_id>
+vocabtest create-pseudowords <your_dataset> <language_id>
+vocabtest create-test <your_dataset> <language_id>
 ```
 
 
 ### Citation
 ```
-# TODO
+@misc{vanrijn2023wikivocab,
+      title={Around the world in 60 words: A generative vocabulary test for online research}, 
+      author={Pol van Rijn and Yue Sun and Harin Lee and Raja Marjieh and Ilia Sucholutsky and Francesca Lanzarini and Elisabeth André and Nori Jacoby},
+      year={2023},
+      eprint={2302.01614},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2302.01614}, 
+}
 ```
-
-### TODOs
-- [ ] Set MANIFEST.in
-- [ ] Update READMEs
